@@ -1,5 +1,6 @@
 # LabelYourWindow
 
+![LabelYourWindow Preview 1](images/c.png)
 ![LabelYourWindow Preview 1](images/a.png)
 ![LabelYourWindow Preview 2](images/b.png)
 
