@@ -19,6 +19,5 @@ struct WindowInfo: Equatable {
     static func == (lhs: WindowInfo, rhs: WindowInfo) -> Bool {
         lhs.identifier == rhs.identifier
             && lhs.windowTitle == rhs.windowTitle
-            && lhs.frame == rhs.frame
     }
 }

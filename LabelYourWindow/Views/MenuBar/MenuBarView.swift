@@ -181,7 +181,7 @@ struct MenuBarView: View {
 
     private var footer: some View {
         HStack {
-            Text("⌥ Option+Drag to move labels")
+            Text("Hover over label to drag")
                 .font(.caption2)
                 .foregroundStyle(.tertiary)
             Spacer()

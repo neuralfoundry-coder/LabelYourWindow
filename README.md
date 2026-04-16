@@ -9,7 +9,7 @@ Built for **macOS 15+** (Sequoia) on **Apple Silicon**.
 - **Auto Label Detection** - Reads window titles via Accessibility API and parses them into meaningful labels (browsers, editors, terminals, and more)
 - **Translucent Glass Overlay** - Behind-window blur effect with minimal text-based design
 - **Fade Away / Pinned Modes** - Labels appear on window switch and fade out, or stay pinned
-- **Drag to Reposition** - Hold `⌥ Option` and drag any label to move it
+- **Drag to Reposition** - Hover over any label and drag to move it
 - **Custom Labels** - Edit labels directly from the menu bar popover
 - **Rule Engine** - Define regex-based rules to auto-label windows by app name, title, or bundle ID
 - **Full Settings UI** - Customize font, opacity, position, duration, corner radius, and more
@@ -38,7 +38,7 @@ xcodebuild -scheme LabelYourWindow -configuration Release -arch arm64 build
 | Toggle on/off | Click menu bar icon > toggle switch |
 | Edit label | Click menu bar icon > Edit Label |
 | Switch mode | Click menu bar icon > Pinned / Fade Away |
-| Move label | Hold `⌥ Option` + drag the label |
+| Move label | Hover over label + drag |
 | Open settings | Click menu bar icon > Settings... |
 | Add auto-rule | Settings > Rules tab > `+` button |
 

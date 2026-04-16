@@ -4,7 +4,7 @@ final class OverlayWindow: NSPanel {
     var onDragMoved: ((CGPoint) -> Void)?
     private var initialMouseLocation: CGPoint = .zero
     private var initialWindowOrigin: CGPoint = .zero
-    private var dragging = false
+    private(set) var isDragging = false
 
     init(contentRect: NSRect) {
         super.init(
@@ -23,7 +23,7 @@ final class OverlayWindow: NSPanel {
         animationBehavior = .none
         hidesOnDeactivate = false
         becomesKeyOnlyIfNeeded = true
-        // Click-through by default - Option key enables drag
+        // Click-through by default - hover enables drag
         ignoresMouseEvents = true
         isMovableByWindowBackground = false
     }
@@ -31,18 +31,31 @@ final class OverlayWindow: NSPanel {
     override var canBecomeKey: Bool { false }
     override var canBecomeMain: Bool { false }
 
-    func setDraggable(_ draggable: Bool) {
-        ignoresMouseEvents = !draggable
+    func showHoverFeedback(_ show: Bool) {
+        if show {
+            NSCursor.openHand.push()
+        } else {
+            NSCursor.pop()
+        }
+    }
+
+    func endDrag() {
+        if isDragging {
+            isDragging = false
+            NSCursor.pop()
+            onDragMoved?(frame.origin)
+        }
     }
 
     override func mouseDown(with event: NSEvent) {
+        NSCursor.closedHand.push()
         initialMouseLocation = NSEvent.mouseLocation
         initialWindowOrigin = frame.origin
-        dragging = true
+        isDragging = true
     }
 
     override func mouseDragged(with event: NSEvent) {
-        guard dragging else { return }
+        guard isDragging else { return }
         let currentMouse = NSEvent.mouseLocation
         let newOrigin = CGPoint(
             x: initialWindowOrigin.x + (currentMouse.x - initialMouseLocation.x),
@@ -52,8 +65,9 @@ final class OverlayWindow: NSPanel {
     }
 
     override func mouseUp(with event: NSEvent) {
-        if dragging {
-            dragging = false
+        if isDragging {
+            isDragging = false
+            NSCursor.pop()
             onDragMoved?(frame.origin)
         }
     }

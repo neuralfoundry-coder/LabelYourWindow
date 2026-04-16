@@ -10,26 +10,63 @@ final class OverlayManager {
     private var overlayWindows: [String: OverlayWindow] = [:]
     private var fadeTasks: [String: Task<Void, Never>] = [:]
     private var customPositions: [String: CGPoint] = [:]
+    private var overlayLabels: [String: String] = [:]
     private var currentKey: String?
-    private var flagsMonitor: Any?
+    private var globalMoveMonitor: Any?
+    private var localMoveMonitor: Any?
+    private var mouseUpMonitor: Any?
 
     init(settings: SettingsManager) {
         self.settings = settings
-        setupDragModifier()
+        loadPositions()
+        setupHoverDetection()
     }
 
-    /// Option key toggles drag mode on all visible overlays
-    private func setupDragModifier() {
-        flagsMonitor = NSEvent.addLocalMonitorForEvents(matching: .flagsChanged) { [weak self] event in
-            let optionDown = event.modifierFlags.contains(.option)
-            self?.setAllDraggable(optionDown)
+    deinit {
+        if let m = globalMoveMonitor { NSEvent.removeMonitor(m) }
+        if let m = localMoveMonitor { NSEvent.removeMonitor(m) }
+        if let m = mouseUpMonitor { NSEvent.removeMonitor(m) }
+    }
+
+    /// Hover over label to enable drag
+    private func setupHoverDetection() {
+        // Global monitor: catches mouse moves when events go to other apps (ignoresMouseEvents = true)
+        globalMoveMonitor = NSEvent.addGlobalMonitorForEvents(matching: .mouseMoved) { [weak self] _ in
+            self?.handleMouseMoved()
+        }
+
+        // Local monitor: catches mouse moves when our window receives events (ignoresMouseEvents = false)
+        localMoveMonitor = NSEvent.addLocalMonitorForEvents(matching: .mouseMoved) { [weak self] event in
+            self?.handleMouseMoved()
+            return event
+        }
+
+        // Safety net: end any active drag if mouse up was missed
+        mouseUpMonitor = NSEvent.addLocalMonitorForEvents(matching: .leftMouseUp) { [weak self] event in
+            guard let self = self else { return event }
+            for (_, overlay) in self.overlayWindows where overlay.isDragging {
+                overlay.endDrag()
+            }
             return event
         }
     }
 
-    private func setAllDraggable(_ draggable: Bool) {
-        for (_, overlay) in overlayWindows where overlay.isVisible {
-            overlay.setDraggable(draggable)
+    private func handleMouseMoved() {
+        let mouseLocation = NSEvent.mouseLocation
+
+        for (_, overlay) in overlayWindows where overlay.isVisible && overlay.alphaValue > 0.01 {
+            let overlayFrame = overlay.frame
+            if overlayFrame.contains(mouseLocation) {
+                if overlay.ignoresMouseEvents {
+                    overlay.ignoresMouseEvents = false
+                    overlay.showHoverFeedback(true)
+                }
+            } else {
+                if !overlay.ignoresMouseEvents && !overlay.isDragging {
+                    overlay.ignoresMouseEvents = true
+                    overlay.showHoverFeedback(false)
+                }
+            }
         }
     }
 
@@ -48,27 +85,34 @@ final class OverlayManager {
 
         let overlay = getOrCreateOverlay(for: key)
 
-        // Set content
-        let hostingView = NSHostingView(
-            rootView: LabelOverlayView(label: label, settings: settings)
-        )
-        let fittingSize = hostingView.fittingSize
-        hostingView.frame = NSRect(origin: .zero, size: fittingSize)
-        overlay.contentView = hostingView
-        overlay.setContentSize(fittingSize)
+        // Set content only if label changed
+        if overlayLabels[key] != label {
+            let hostingView = NSHostingView(
+                rootView: LabelOverlayView(label: label, settings: settings)
+            )
+            let fittingSize = hostingView.fittingSize
+            hostingView.frame = NSRect(origin: .zero, size: fittingSize)
+            overlay.contentView = hostingView
+            overlay.setContentSize(fittingSize)
+            overlayLabels[key] = label
+        }
 
-        // Position the overlay
+        // Position the overlay (absolute desktop position)
+        let overlaySize = overlay.frame.size
         let position: CGPoint
         if let custom = customPositions[key] {
             position = custom
         } else {
-            position = calculatePosition(for: window, overlaySize: fittingSize)
+            position = calculatePosition(for: window, overlaySize: overlaySize)
+            customPositions[key] = position
+            savePositions()
         }
         overlay.setFrameOrigin(position)
 
         // Wire up drag callback
         overlay.onDragMoved = { [weak self] newOrigin in
             self?.customPositions[key] = newOrigin
+            self?.savePositions()
         }
 
         // Fade in
@@ -90,7 +134,7 @@ final class OverlayManager {
             scheduleFadeOut(key: key)
         }
 
-        logger.info("Overlay positioned at (\(Int(position.x)), \(Int(position.y))) size \(Int(fittingSize.width))x\(Int(fittingSize.height))")
+        logger.info("Overlay positioned at (\(Int(position.x)), \(Int(position.y))) size \(Int(overlaySize.width))x\(Int(overlaySize.height))")
     }
 
     func hideAll() {
@@ -141,6 +185,21 @@ final class OverlayManager {
             try? await Task.sleep(for: .seconds(self.settings.fadeDuration))
             guard !Task.isCancelled else { return }
             self.hideLabel(for: key, animated: true)
+        }
+    }
+
+    // MARK: - Position persistence
+
+    private func loadPositions() {
+        guard let data = UserDefaults.standard.data(forKey: "overlayPositions"),
+              let dict = try? JSONDecoder().decode([String: [Double]].self, from: data) else { return }
+        customPositions = dict.mapValues { CGPoint(x: $0[0], y: $0[1]) }
+    }
+
+    private func savePositions() {
+        let dict = customPositions.mapValues { [$0.x, $0.y] }
+        if let data = try? JSONEncoder().encode(dict) {
+            UserDefaults.standard.set(data, forKey: "overlayPositions")
         }
     }
 

@@ -3,6 +3,7 @@ import Foundation
 @Observable
 final class LabelManager {
     private let settings: SettingsManager
+    private var labelCache: [String: LabelAssignment] = [:]
 
     private(set) var currentLabel: String = ""
     private(set) var currentAssignment: LabelAssignment?
@@ -12,31 +13,19 @@ final class LabelManager {
     }
 
     func labelForWindow(_ info: WindowInfo) -> LabelAssignment {
-        // Priority 1: Manual label
-        let manualKey = manualKey(for: info)
-        if let manual = settings.manualLabels[manualKey] {
-            let assignment = LabelAssignment(label: manual, source: .manual)
-            currentLabel = manual
-            currentAssignment = assignment
-            return assignment
+        let cacheKey = info.identifier.key
+
+        // Return cached label if it exists
+        if let cached = labelCache[cacheKey] {
+            currentLabel = cached.label
+            currentAssignment = cached
+            return cached
         }
 
-        // Priority 2: User-defined rules
-        if let ruleLabel = matchRule(for: info) {
-            let assignment = LabelAssignment(label: ruleLabel, source: .rule)
-            currentLabel = ruleLabel
-            currentAssignment = assignment
-            return assignment
-        }
-
-        // Priority 3: Auto-detection from window title
-        let autoLabel = WindowTitleParser.parse(
-            title: info.windowTitle,
-            appName: info.appName,
-            bundleID: info.bundleID
-        )
-        let assignment = LabelAssignment(label: autoLabel, source: .autoDetected)
-        currentLabel = autoLabel
+        // First time seeing this window — resolve and cache
+        let assignment = resolveLabel(for: info)
+        labelCache[cacheKey] = assignment
+        currentLabel = assignment.label
         currentAssignment = assignment
         return assignment
     }
@@ -50,10 +39,45 @@ final class LabelManager {
             labels[key] = label
         }
         settings.manualLabels = labels
+
+        // Update cache
+        let cacheKey = info.identifier.key
+        if label.isEmpty {
+            labelCache.removeValue(forKey: cacheKey)
+        } else {
+            labelCache[cacheKey] = LabelAssignment(label: label, source: .manual)
+        }
     }
 
     func clearManualLabel(for info: WindowInfo) {
         setManualLabel("", for: info)
+    }
+
+    func invalidateCache(for identifier: WindowIdentifier) {
+        labelCache.removeValue(forKey: identifier.key)
+    }
+
+    // MARK: - Label Resolution
+
+    private func resolveLabel(for info: WindowInfo) -> LabelAssignment {
+        // Priority 1: Manual label
+        let manualKey = manualKey(for: info)
+        if let manual = settings.manualLabels[manualKey] {
+            return LabelAssignment(label: manual, source: .manual)
+        }
+
+        // Priority 2: User-defined rules
+        if let ruleLabel = matchRule(for: info) {
+            return LabelAssignment(label: ruleLabel, source: .rule)
+        }
+
+        // Priority 3: Auto-detection from window title
+        let autoLabel = WindowTitleParser.parse(
+            title: info.windowTitle,
+            appName: info.appName,
+            bundleID: info.bundleID
+        )
+        return LabelAssignment(label: autoLabel, source: .autoDetected)
     }
 
     // MARK: - Private
