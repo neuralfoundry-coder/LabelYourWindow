@@ -1,0 +1,465 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		16B096E53C20034A931B701E /* WindowObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6278BF54B0740BA5EEF2712E /* WindowObserver.swift */; };
+		2265D140BA071FF89DF9946F /* LabelRule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 782EEB6EDC55DA523A9B92B1 /* LabelRule.swift */; };
+		2DA974C00C1F2FDCA86A63CD /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2A40F69F7C89A8E37618040 /* AppDelegate.swift */; };
+		4289834B9E46C7B1F1535DDC /* LabelYourWindowApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B91EAE30DD1E14EE4DD1E9 /* LabelYourWindowApp.swift */; };
+		4D82006E24BCECF1B491F86D /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8641D3CBB146252132CFD546 /* SettingsView.swift */; };
+		536DCBFD416071E190104404 /* OverlayWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C8BF0432981E07CD462589E /* OverlayWindow.swift */; };
+		7F1E256AC5F8A24979491D3C /* LabelAssignment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50AFB83C7BF2A8113426F285 /* LabelAssignment.swift */; };
+		8BCEE802455A25487C4CFBA8 /* WindowTitleParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E24C36C325583535E91192B /* WindowTitleParser.swift */; };
+		931A1090581229750B121B01 /* OverlayManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF1CAD79B571334F2610DA98 /* OverlayManager.swift */; };
+		941DE27462A324AC9B9F3A78 /* AppearanceSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 688B2C02C59846A7EF7BE1A7 /* AppearanceSettingsView.swift */; };
+		990E8E83436288BC18F1FE98 /* LabelOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37693BBC6F1DE9106153293D /* LabelOverlayView.swift */; };
+		A159657375CFDEF87183599B /* LabelManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD8C8745833E8675C89A9F7C /* LabelManager.swift */; };
+		B234D6CF92408D9E5EBDB659 /* RulesSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0993A04EAD5EB682F1870EEB /* RulesSettingsView.swift */; };
+		BC31730B88D1C4D0E80C2C8D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1A94B099841EF0A0A7B92AB5 /* Assets.xcassets */; };
+		CC52E385FCA7CD8F70D7DDF8 /* AccessibilityHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 523D9B8017BD8A708706C236 /* AccessibilityHelper.swift */; };
+		D43D9207FCD8D1FF09606AC2 /* SettingsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBA96EB698893E3D43B979FB /* SettingsManager.swift */; };
+		D4647A8985C54945AD28E527 /* WindowInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F15AC87E44546E91E45F5B3 /* WindowInfo.swift */; };
+		DA6EE4207E4204E5E2CB68EA /* GeneralSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48C502D32C546566CA3A0979 /* GeneralSettingsView.swift */; };
+		DD3889F1902CCE517E8C0D17 /* MenuBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93AD97B2BD5E83EB6C00ADF9 /* MenuBarView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		0993A04EAD5EB682F1870EEB /* RulesSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RulesSettingsView.swift; sourceTree = "<group>"; };
+		1A94B099841EF0A0A7B92AB5 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		1F15AC87E44546E91E45F5B3 /* WindowInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowInfo.swift; sourceTree = "<group>"; };
+		37693BBC6F1DE9106153293D /* LabelOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabelOverlayView.swift; sourceTree = "<group>"; };
+		40B91EAE30DD1E14EE4DD1E9 /* LabelYourWindowApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabelYourWindowApp.swift; sourceTree = "<group>"; };
+		48C502D32C546566CA3A0979 /* GeneralSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralSettingsView.swift; sourceTree = "<group>"; };
+		4E24C36C325583535E91192B /* WindowTitleParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowTitleParser.swift; sourceTree = "<group>"; };
+		50AFB83C7BF2A8113426F285 /* LabelAssignment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabelAssignment.swift; sourceTree = "<group>"; };
+		523D9B8017BD8A708706C236 /* AccessibilityHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityHelper.swift; sourceTree = "<group>"; };
+		6278BF54B0740BA5EEF2712E /* WindowObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowObserver.swift; sourceTree = "<group>"; };
+		688B2C02C59846A7EF7BE1A7 /* AppearanceSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppearanceSettingsView.swift; sourceTree = "<group>"; };
+		73398FE58320C8B8A611F92F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		782EEB6EDC55DA523A9B92B1 /* LabelRule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabelRule.swift; sourceTree = "<group>"; };
+		8641D3CBB146252132CFD546 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		8C8BF0432981E07CD462589E /* OverlayWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayWindow.swift; sourceTree = "<group>"; };
+		93AD97B2BD5E83EB6C00ADF9 /* MenuBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarView.swift; sourceTree = "<group>"; };
+		A10089F024DF386B52102E4A /* LabelYourWindow.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = LabelYourWindow.entitlements; sourceTree = "<group>"; };
+		B2A40F69F7C89A8E37618040 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		BC35699D749E94000C547CB1 /* LabelYourWindow.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LabelYourWindow.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		BF1CAD79B571334F2610DA98 /* OverlayManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayManager.swift; sourceTree = "<group>"; };
+		DBA96EB698893E3D43B979FB /* SettingsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsManager.swift; sourceTree = "<group>"; };
+		FD8C8745833E8675C89A9F7C /* LabelManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabelManager.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		0EA63E8C88A33586BAF10C30 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				688B2C02C59846A7EF7BE1A7 /* AppearanceSettingsView.swift */,
+				48C502D32C546566CA3A0979 /* GeneralSettingsView.swift */,
+				0993A04EAD5EB682F1870EEB /* RulesSettingsView.swift */,
+				8641D3CBB146252132CFD546 /* SettingsView.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+		2A68CF13429C3B5FABF8189D /* MenuBar */ = {
+			isa = PBXGroup;
+			children = (
+				93AD97B2BD5E83EB6C00ADF9 /* MenuBarView.swift */,
+			);
+			path = MenuBar;
+			sourceTree = "<group>";
+		};
+		5B440D62F51C485A66A20476 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				1A94B099841EF0A0A7B92AB5 /* Assets.xcassets */,
+				73398FE58320C8B8A611F92F /* Info.plist */,
+				A10089F024DF386B52102E4A /* LabelYourWindow.entitlements */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		63F86D8957EA8E048F73445C /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				2A68CF13429C3B5FABF8189D /* MenuBar */,
+				756C2AF6B83F8689925B28AD /* Overlay */,
+				0EA63E8C88A33586BAF10C30 /* Settings */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		71AE176AFD2F9B8806310410 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				50AFB83C7BF2A8113426F285 /* LabelAssignment.swift */,
+				782EEB6EDC55DA523A9B92B1 /* LabelRule.swift */,
+				1F15AC87E44546E91E45F5B3 /* WindowInfo.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		756C2AF6B83F8689925B28AD /* Overlay */ = {
+			isa = PBXGroup;
+			children = (
+				37693BBC6F1DE9106153293D /* LabelOverlayView.swift */,
+				8C8BF0432981E07CD462589E /* OverlayWindow.swift */,
+			);
+			path = Overlay;
+			sourceTree = "<group>";
+		};
+		786287951232C8B5A5FF4446 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				B2A40F69F7C89A8E37618040 /* AppDelegate.swift */,
+				40B91EAE30DD1E14EE4DD1E9 /* LabelYourWindowApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		874A141CAABA97C3171FD920 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				BC35699D749E94000C547CB1 /* LabelYourWindow.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		95BFD4A84EB213FB55E3C321 /* LabelYourWindow */ = {
+			isa = PBXGroup;
+			children = (
+				786287951232C8B5A5FF4446 /* App */,
+				B9D7E67FE07EEF960FFC52A2 /* Core */,
+				71AE176AFD2F9B8806310410 /* Models */,
+				5B440D62F51C485A66A20476 /* Resources */,
+				CCD3B563E80B52BD36DEE09C /* Utilities */,
+				63F86D8957EA8E048F73445C /* Views */,
+			);
+			path = LabelYourWindow;
+			sourceTree = "<group>";
+		};
+		B9D7E67FE07EEF960FFC52A2 /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				523D9B8017BD8A708706C236 /* AccessibilityHelper.swift */,
+				FD8C8745833E8675C89A9F7C /* LabelManager.swift */,
+				BF1CAD79B571334F2610DA98 /* OverlayManager.swift */,
+				DBA96EB698893E3D43B979FB /* SettingsManager.swift */,
+				6278BF54B0740BA5EEF2712E /* WindowObserver.swift */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
+		CCD3B563E80B52BD36DEE09C /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				4E24C36C325583535E91192B /* WindowTitleParser.swift */,
+			);
+			path = Utilities;
+			sourceTree = "<group>";
+		};
+		E02E05B64B5BC5055D44218A = {
+			isa = PBXGroup;
+			children = (
+				95BFD4A84EB213FB55E3C321 /* LabelYourWindow */,
+				874A141CAABA97C3171FD920 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		6A619AF0D27839E82C14ADE2 /* LabelYourWindow */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1A45CDC5C46EE997C740726F /* Build configuration list for PBXNativeTarget "LabelYourWindow" */;
+			buildPhases = (
+				5D22F0353EC20B2BBA30E746 /* Sources */,
+				80BB137040CA5CBFC2B86963 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = LabelYourWindow;
+			packageProductDependencies = (
+			);
+			productName = LabelYourWindow;
+			productReference = BC35699D749E94000C547CB1 /* LabelYourWindow.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		E599EE91F0899E5D6332DD07 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+					6A619AF0D27839E82C14ADE2 = {
+						DevelopmentTeam = YBR9AQ6NVQ;
+						ProvisioningStyle = Manual;
+					};
+				};
+			};
+			buildConfigurationList = EAD6A81CFFA6D7E358FB9B41 /* Build configuration list for PBXProject "LabelYourWindow" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = E02E05B64B5BC5055D44218A;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 874A141CAABA97C3171FD920 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				6A619AF0D27839E82C14ADE2 /* LabelYourWindow */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		80BB137040CA5CBFC2B86963 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BC31730B88D1C4D0E80C2C8D /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		5D22F0353EC20B2BBA30E746 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CC52E385FCA7CD8F70D7DDF8 /* AccessibilityHelper.swift in Sources */,
+				2DA974C00C1F2FDCA86A63CD /* AppDelegate.swift in Sources */,
+				941DE27462A324AC9B9F3A78 /* AppearanceSettingsView.swift in Sources */,
+				DA6EE4207E4204E5E2CB68EA /* GeneralSettingsView.swift in Sources */,
+				7F1E256AC5F8A24979491D3C /* LabelAssignment.swift in Sources */,
+				A159657375CFDEF87183599B /* LabelManager.swift in Sources */,
+				990E8E83436288BC18F1FE98 /* LabelOverlayView.swift in Sources */,
+				2265D140BA071FF89DF9946F /* LabelRule.swift in Sources */,
+				4289834B9E46C7B1F1535DDC /* LabelYourWindowApp.swift in Sources */,
+				DD3889F1902CCE517E8C0D17 /* MenuBarView.swift in Sources */,
+				931A1090581229750B121B01 /* OverlayManager.swift in Sources */,
+				536DCBFD416071E190104404 /* OverlayWindow.swift in Sources */,
+				B234D6CF92408D9E5EBDB659 /* RulesSettingsView.swift in Sources */,
+				D43D9207FCD8D1FF09606AC2 /* SettingsManager.swift in Sources */,
+				4D82006E24BCECF1B491F86D /* SettingsView.swift in Sources */,
+				D4647A8985C54945AD28E527 /* WindowInfo.swift in Sources */,
+				16B096E53C20034A931B701E /* WindowObserver.swift in Sources */,
+				8BCEE802455A25487C4CFBA8 /* WindowTitleParser.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		49D9A8F35515B0F66D51B850 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = LabelYourWindow/Resources/LabelYourWindow.entitlements;
+				CODE_SIGN_IDENTITY = 68EC0581BE9897924BB3AD8A3A42FA4A91B87AB6;
+				CODE_SIGN_STYLE = Manual;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = YBR9AQ6NVQ;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = LabelYourWindow/Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.labelyourwindow.app;
+				PRODUCT_NAME = LabelYourWindow;
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		874C3589E654CDFBC32CACD4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				"EXCLUDED_ARCHS[sdk=*]" = x86_64;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.9;
+				VALID_ARCHS = arm64;
+			};
+			name = Debug;
+		};
+		9BACC11734F1745EB6004C31 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				"EXCLUDED_ARCHS[sdk=*]" = x86_64;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.9;
+				VALID_ARCHS = arm64;
+			};
+			name = Release;
+		};
+		E59291DE3D19DABA24AC46B7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = LabelYourWindow/Resources/LabelYourWindow.entitlements;
+				CODE_SIGN_IDENTITY = 68EC0581BE9897924BB3AD8A3A42FA4A91B87AB6;
+				CODE_SIGN_STYLE = Manual;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = YBR9AQ6NVQ;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = LabelYourWindow/Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.labelyourwindow.app;
+				PRODUCT_NAME = LabelYourWindow;
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1A45CDC5C46EE997C740726F /* Build configuration list for PBXNativeTarget "LabelYourWindow" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				49D9A8F35515B0F66D51B850 /* Debug */,
+				E59291DE3D19DABA24AC46B7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		EAD6A81CFFA6D7E358FB9B41 /* Build configuration list for PBXProject "LabelYourWindow" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				874C3589E654CDFBC32CACD4 /* Debug */,
+				9BACC11734F1745EB6004C31 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = E599EE91F0899E5D6332DD07 /* Project object */;
+}
