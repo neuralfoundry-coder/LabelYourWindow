@@ -1,7 +1,7 @@
 # LabelYourWindow
 
-![LabelYourWindow Preview 1](images/a.jpg)
-![LabelYourWindow Preview 2](images/b.jpg)
+![LabelYourWindow Preview 1](images/a.png)
+![LabelYourWindow Preview 2](images/b.png)
 
 A minimal macOS menu bar app that displays translucent label overlays on your windows, so you always know what each window is for.
 
