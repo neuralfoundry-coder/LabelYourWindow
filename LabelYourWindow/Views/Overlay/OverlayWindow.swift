@@ -64,6 +64,7 @@ final class OverlayWindow: NSPanel {
 
     override func mouseDown(with event: NSEvent) {
         if event.clickCount == 2 && !_isEditMode {
+            isDragging = false  // cancel any drag started on first click
             onDoubleClick?()
             return
         }

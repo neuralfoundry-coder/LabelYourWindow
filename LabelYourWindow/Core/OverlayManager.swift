@@ -16,6 +16,7 @@ final class OverlayManager {
     private var resolvedWindowInfo: [String: WindowInfo] = [:]
     private var editingText: [String: String] = [:]
     private var currentKey: String?
+    private var missingCounts: [String: Int] = [:]
     private var globalMoveMonitor: Any?
     private var localMoveMonitor: Any?
     private var mouseUpMonitor: Any?
@@ -75,54 +76,55 @@ final class OverlayManager {
     func showOrUpdateLabel(_ label: String, for window: WindowInfo, isPinned: Bool) {
         let key = window.identifier.key
 
-        fadeTasks[key]?.cancel()
-        fadeTasks.removeValue(forKey: key)
-
-        // Hide previous overlay only in single-window mode
+        // Single-window mode: hide previous overlay on focus change
         if !settings.multiWindowMode {
             if let prevKey = currentKey, prevKey != key {
+                fadeTasks[prevKey]?.cancel()
+                fadeTasks.removeValue(forKey: prevKey)
                 hideLabel(for: prevKey, animated: true)
             }
             currentKey = key
         }
 
         resolvedWindowInfo[key] = window
-
         let overlay = getOrCreateOverlay(for: key)
 
-        // Update content if label changed (and not in edit mode)
-        if overlayLabels[key] != label && !overlay.isEditMode {
+        // Calculate desired position
+        let overlaySize = overlay.frame.size
+        let newPosition: CGPoint = userDraggedPositions[key] ?? calculatePosition(for: window, overlaySize: overlaySize)
+        let currentOrigin = overlay.frame.origin
+        let positionChanged = abs(newPosition.x - currentOrigin.x) > 2 || abs(newPosition.y - currentOrigin.y) > 2
+
+        // Fast path: skip all expensive work when nothing has changed
+        let labelUnchanged = overlayLabels[key] == label
+        let alreadyVisible = overlay.isVisible && overlay.alphaValue > 0.5
+        if labelUnchanged && !positionChanged && alreadyVisible && !overlay.isEditMode {
+            // Cancel any stale fade task for pinned overlays
+            if isPinned {
+                fadeTasks[key]?.cancel()
+                fadeTasks.removeValue(forKey: key)
+            }
+            return
+        }
+
+        // Cancel pending fade
+        fadeTasks[key]?.cancel()
+        fadeTasks.removeValue(forKey: key)
+
+        // Update label content if changed (skip during edit mode)
+        if !labelUnchanged && !overlay.isEditMode {
             rebuildDisplayContent(for: key, label: label, overlay: overlay)
             overlayLabels[key] = label
+            // Recalculate position with updated size
+            let updatedSize = overlay.frame.size
+            let recalculated = userDraggedPositions[key] ?? calculatePosition(for: window, overlaySize: updatedSize)
+            overlay.setFrameOrigin(recalculated)
+        } else if positionChanged {
+            overlay.setFrameOrigin(newPosition)
         }
 
-        // Position: user-dragged takes priority, otherwise recalculate from window frame
-        let overlaySize = overlay.frame.size
-        let position: CGPoint
-        if let dragged = userDraggedPositions[key] {
-            position = dragged
-        } else {
-            position = calculatePosition(for: window, overlaySize: overlaySize)
-        }
-        // Only reposition if moved more than 2pt to avoid CGWindowList precision jitter
-        let current = overlay.frame.origin
-        if abs(position.x - current.x) > 2 || abs(position.y - current.y) > 2 {
-            overlay.setFrameOrigin(position)
-        }
-
-        // Wire drag callback
-        overlay.onDragMoved = { [weak self] newOrigin in
-            self?.userDraggedPositions[key] = newOrigin
-            self?.savePositions()
-        }
-
-        // Wire double-click for edit mode
-        overlay.onDoubleClick = { [weak self] in
-            self?.enterEditMode(for: key)
-        }
-
-        // Fade in
-        if overlay.alphaValue < 0.01 || !overlay.isVisible {
+        // Show overlay if not yet visible
+        if !alreadyVisible {
             overlay.alphaValue = 0
             overlay.orderFrontRegardless()
             NSAnimationContext.runAnimationGroup { ctx in
@@ -130,16 +132,12 @@ final class OverlayManager {
                 ctx.timingFunction = CAMediaTimingFunction(name: .easeOut)
                 overlay.animator().alphaValue = 1.0
             }
-        } else if !overlay.isEditMode {
-            overlay.orderFrontRegardless()
-            overlay.alphaValue = 1.0
+            logger.info("Overlay shown at (\(Int(newPosition.x)), \(Int(newPosition.y))) for '\(label, privacy: .public)'")
         }
 
         if !isPinned {
             scheduleFadeOut(key: key)
         }
-
-        logger.info("Overlay positioned at (\(Int(position.x)), \(Int(position.y))) size \(Int(overlaySize.width))x\(Int(overlaySize.height))")
     }
 
     // Legacy name for compatibility
@@ -179,8 +177,19 @@ final class OverlayManager {
     }
 
     func removeOverlays(notIn activeKeys: Set<String>) {
+        // Reset missing count for windows that reappeared
+        for key in activeKeys {
+            missingCounts.removeValue(forKey: key)
+        }
+
         let staleKeys = Set(overlayWindows.keys).subtracting(activeKeys)
         for key in staleKeys {
+            // Only remove after 2 consecutive missing cycles (~1s grace period)
+            // This prevents flicker from CGWindowList returning inconsistent results
+            missingCounts[key, default: 0] += 1
+            guard missingCounts[key, default: 0] >= 2 else { continue }
+
+            missingCounts.removeValue(forKey: key)
             hideLabel(for: key, animated: true)
             overlayWindows.removeValue(forKey: key)
             overlayLabels.removeValue(forKey: key)
@@ -201,12 +210,15 @@ final class OverlayManager {
 
         editingText[key] = overlayLabels[key] ?? ""
         overlay.ignoresMouseEvents = false
-        overlay.isEditMode = true
-        rebuildEditContent(for: key, overlay: overlay)
 
+        // Build edit content first so the text field exists before makeKeyAndOrderFront
+        rebuildEditContent(for: key, overlay: overlay)
         let overlaySize = overlay.contentView?.fittingSize ?? overlay.frame.size
         overlay.setContentSize(overlaySize)
         overlay.setFrameOrigin(clampToVisibleScreens(overlay.frame.origin, overlaySize: overlaySize))
+
+        // Make key after content is ready so @FocusState onAppear fires with a key window
+        overlay.isEditMode = true
     }
 
     func commitEdit(for key: String) {
@@ -285,6 +297,14 @@ final class OverlayManager {
             return existing
         }
         let overlay = OverlayWindow(contentRect: .zero)
+        // Wire callbacks once at creation — not on every showOrUpdateLabel call
+        overlay.onDragMoved = { [weak self] newOrigin in
+            self?.userDraggedPositions[key] = newOrigin
+            self?.savePositions()
+        }
+        overlay.onDoubleClick = { [weak self] in
+            self?.enterEditMode(for: key)
+        }
         overlayWindows[key] = overlay
         return overlay
     }

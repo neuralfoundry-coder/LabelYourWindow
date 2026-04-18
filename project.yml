@@ -14,6 +14,12 @@ settings:
     SWIFT_VERSION: "5.9"
     MACOSX_DEPLOYMENT_TARGET: "15.0"
 
+configurations:
+  Debug:
+    type: debug
+  Release:
+    type: release
+
 targets:
   LabelYourWindow:
     type: application
@@ -27,11 +33,14 @@ targets:
         CODE_SIGN_ENTITLEMENTS: LabelYourWindow/Resources/LabelYourWindow.entitlements
         GENERATE_INFOPLIST_FILE: false
         PRODUCT_NAME: LabelYourWindow
-        MARKETING_VERSION: "1.0.0"
-        CURRENT_PROJECT_VERSION: "1"
+        MARKETING_VERSION: "1.2.0"
+        CURRENT_PROJECT_VERSION: "3"
         COMBINE_HIDPI_IMAGES: true
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         CODE_SIGN_IDENTITY: 68EC0581BE9897924BB3AD8A3A42FA4A91B87AB6
         CODE_SIGN_STYLE: Manual
         DEVELOPMENT_TEAM: YBR9AQ6NVQ
         PROVISIONING_PROFILE_SPECIFIER: ""
+      configs:
+        Release:
+          ENABLE_HARDENED_RUNTIME: YES

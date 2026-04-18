@@ -95,11 +95,23 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func setupMultiWindowLoop() {
         multiWindowPollTask = Task { @MainActor [weak self] in
+            var wasMultiWindow = false
             while !Task.isCancelled {
                 try? await Task.sleep(for: .milliseconds(500))
-                guard let self = self,
-                      self.settings.isEnabled,
-                      self.settings.multiWindowMode else { continue }
+                guard let self = self, self.settings.isEnabled else {
+                    wasMultiWindow = false
+                    continue
+                }
+
+                let isMultiWindow = self.settings.multiWindowMode
+
+                // Mode switched OFF — clean up all pinned overlays immediately
+                if wasMultiWindow && !isMultiWindow {
+                    self.overlayManager.hideAll()
+                }
+                wasMultiWindow = isMultiWindow
+
+                guard isMultiWindow else { continue }
 
                 let windows = self.windowObserver.allVisibleWindows()
                 var activeKeys = Set<String>()
