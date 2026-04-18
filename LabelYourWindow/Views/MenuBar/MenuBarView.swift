@@ -92,7 +92,7 @@ struct MenuBarView: View {
             // Source badge
             if let assignment = labelManager.currentAssignment {
                 HStack(spacing: 4) {
-                    Text(assignment.source == .manual ? "Custom" : assignment.source == .rule ? "Rule" : "Auto")
+                    Text(assignment.source == .windowLevel ? "Window" : assignment.source == .manual ? "Custom" : assignment.source == .rule ? "Rule" : "Auto")
                         .font(.caption2)
                         .padding(.horizontal, 6)
                         .padding(.vertical, 2)

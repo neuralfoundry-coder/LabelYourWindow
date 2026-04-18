@@ -4,6 +4,7 @@ import Foundation
 final class LabelManager {
     private let settings: SettingsManager
     private var labelCache: [String: LabelAssignment] = [:]
+    private var sessionWindowLabels: [String: String] = [:]
 
     private(set) var currentLabel: String = ""
     private(set) var currentAssignment: LabelAssignment?
@@ -28,6 +29,20 @@ final class LabelManager {
         currentLabel = assignment.label
         currentAssignment = assignment
         return assignment
+    }
+
+    func setWindowLabel(_ label: String, for info: WindowInfo) {
+        let key = info.identifier.key
+        if label.isEmpty {
+            sessionWindowLabels.removeValue(forKey: key)
+        } else {
+            sessionWindowLabels[key] = label
+        }
+        invalidateCache(for: info.identifier)
+    }
+
+    func clearWindowLabel(for info: WindowInfo) {
+        setWindowLabel("", for: info)
     }
 
     func setManualLabel(_ label: String, for info: WindowInfo) {
@@ -60,6 +75,11 @@ final class LabelManager {
     // MARK: - Label Resolution
 
     private func resolveLabel(for info: WindowInfo) -> LabelAssignment {
+        // Priority 0: Session-scoped window-level label
+        if let windowLabel = sessionWindowLabels[info.identifier.key] {
+            return LabelAssignment(label: windowLabel, source: .windowLevel)
+        }
+
         // Priority 1: Manual label
         let manualKey = manualKey(for: info)
         if let manual = settings.manualLabels[manualKey] {

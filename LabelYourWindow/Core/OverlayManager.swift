@@ -7,10 +7,14 @@ private let logger = Logger(subsystem: "com.labelyourwindow.app", category: "Ove
 @Observable
 final class OverlayManager {
     let settings: SettingsManager
+    weak var labelManager: LabelManager?
+
     private var overlayWindows: [String: OverlayWindow] = [:]
     private var fadeTasks: [String: Task<Void, Never>] = [:]
-    private var customPositions: [String: CGPoint] = [:]
+    private var userDraggedPositions: [String: CGPoint] = [:]
     private var overlayLabels: [String: String] = [:]
+    private var resolvedWindowInfo: [String: WindowInfo] = [:]
+    private var editingText: [String: String] = [:]
     private var currentKey: String?
     private var globalMoveMonitor: Any?
     private var localMoveMonitor: Any?
@@ -30,18 +34,15 @@ final class OverlayManager {
 
     /// Hover over label to enable drag
     private func setupHoverDetection() {
-        // Global monitor: catches mouse moves when events go to other apps (ignoresMouseEvents = true)
         globalMoveMonitor = NSEvent.addGlobalMonitorForEvents(matching: .mouseMoved) { [weak self] _ in
             self?.handleMouseMoved()
         }
 
-        // Local monitor: catches mouse moves when our window receives events (ignoresMouseEvents = false)
         localMoveMonitor = NSEvent.addLocalMonitorForEvents(matching: .mouseMoved) { [weak self] event in
             self?.handleMouseMoved()
             return event
         }
 
-        // Safety net: end any active drag if mouse up was missed
         mouseUpMonitor = NSEvent.addLocalMonitorForEvents(matching: .leftMouseUp) { [weak self] event in
             guard let self = self else { return event }
             for (_, overlay) in self.overlayWindows where overlay.isDragging {
@@ -55,6 +56,7 @@ final class OverlayManager {
         let mouseLocation = NSEvent.mouseLocation
 
         for (_, overlay) in overlayWindows where overlay.isVisible && overlay.alphaValue > 0.01 {
+            guard !overlay.isEditMode else { continue }
             let overlayFrame = overlay.frame
             if overlayFrame.contains(mouseLocation) {
                 if overlay.ignoresMouseEvents {
@@ -70,49 +72,53 @@ final class OverlayManager {
         }
     }
 
-    func showLabel(_ label: String, for window: WindowInfo, isPinned: Bool) {
+    func showOrUpdateLabel(_ label: String, for window: WindowInfo, isPinned: Bool) {
         let key = window.identifier.key
 
-        // Cancel any pending fade for this window
         fadeTasks[key]?.cancel()
         fadeTasks.removeValue(forKey: key)
 
-        // Hide previous overlay if different window
-        if let prevKey = currentKey, prevKey != key {
-            hideLabel(for: prevKey, animated: true)
+        // Hide previous overlay only in single-window mode
+        if !settings.multiWindowMode {
+            if let prevKey = currentKey, prevKey != key {
+                hideLabel(for: prevKey, animated: true)
+            }
+            currentKey = key
         }
-        currentKey = key
+
+        resolvedWindowInfo[key] = window
 
         let overlay = getOrCreateOverlay(for: key)
 
-        // Set content only if label changed
-        if overlayLabels[key] != label {
-            let hostingView = NSHostingView(
-                rootView: LabelOverlayView(label: label, settings: settings)
-            )
-            let fittingSize = hostingView.fittingSize
-            hostingView.frame = NSRect(origin: .zero, size: fittingSize)
-            overlay.contentView = hostingView
-            overlay.setContentSize(fittingSize)
+        // Update content if label changed (and not in edit mode)
+        if overlayLabels[key] != label && !overlay.isEditMode {
+            rebuildDisplayContent(for: key, label: label, overlay: overlay)
             overlayLabels[key] = label
         }
 
-        // Position the overlay (absolute desktop position)
+        // Position: user-dragged takes priority, otherwise recalculate from window frame
         let overlaySize = overlay.frame.size
         let position: CGPoint
-        if let custom = customPositions[key] {
-            position = custom
+        if let dragged = userDraggedPositions[key] {
+            position = dragged
         } else {
             position = calculatePosition(for: window, overlaySize: overlaySize)
-            customPositions[key] = position
-            savePositions()
         }
-        overlay.setFrameOrigin(position)
+        // Only reposition if moved more than 2pt to avoid CGWindowList precision jitter
+        let current = overlay.frame.origin
+        if abs(position.x - current.x) > 2 || abs(position.y - current.y) > 2 {
+            overlay.setFrameOrigin(position)
+        }
 
-        // Wire up drag callback
+        // Wire drag callback
         overlay.onDragMoved = { [weak self] newOrigin in
-            self?.customPositions[key] = newOrigin
+            self?.userDraggedPositions[key] = newOrigin
             self?.savePositions()
+        }
+
+        // Wire double-click for edit mode
+        overlay.onDoubleClick = { [weak self] in
+            self?.enterEditMode(for: key)
         }
 
         // Fade in
@@ -124,17 +130,21 @@ final class OverlayManager {
                 ctx.timingFunction = CAMediaTimingFunction(name: .easeOut)
                 overlay.animator().alphaValue = 1.0
             }
-        } else {
+        } else if !overlay.isEditMode {
             overlay.orderFrontRegardless()
             overlay.alphaValue = 1.0
         }
 
-        // Schedule fade out if not pinned
         if !isPinned {
             scheduleFadeOut(key: key)
         }
 
         logger.info("Overlay positioned at (\(Int(position.x)), \(Int(position.y))) size \(Int(overlaySize.width))x\(Int(overlaySize.height))")
+    }
+
+    // Legacy name for compatibility
+    func showLabel(_ label: String, for window: WindowInfo, isPinned: Bool) {
+        showOrUpdateLabel(label, for: window, isPinned: isPinned)
     }
 
     func hideAll() {
@@ -168,6 +178,106 @@ final class OverlayManager {
         }
     }
 
+    func removeOverlays(notIn activeKeys: Set<String>) {
+        let staleKeys = Set(overlayWindows.keys).subtracting(activeKeys)
+        for key in staleKeys {
+            hideLabel(for: key, animated: true)
+            overlayWindows.removeValue(forKey: key)
+            overlayLabels.removeValue(forKey: key)
+            fadeTasks.removeValue(forKey: key)
+            resolvedWindowInfo.removeValue(forKey: key)
+            editingText.removeValue(forKey: key)
+        }
+    }
+
+    // MARK: - Edit mode
+
+    func enterEditMode(for key: String) {
+        guard let overlay = overlayWindows[key] else { return }
+        guard !overlay.isEditMode else { return }
+
+        fadeTasks[key]?.cancel()
+        fadeTasks.removeValue(forKey: key)
+
+        editingText[key] = overlayLabels[key] ?? ""
+        overlay.ignoresMouseEvents = false
+        overlay.isEditMode = true
+        rebuildEditContent(for: key, overlay: overlay)
+
+        let overlaySize = overlay.contentView?.fittingSize ?? overlay.frame.size
+        overlay.setContentSize(overlaySize)
+        overlay.setFrameOrigin(clampToVisibleScreens(overlay.frame.origin, overlaySize: overlaySize))
+    }
+
+    func commitEdit(for key: String) {
+        let text = editingText[key]?.trimmingCharacters(in: .whitespaces) ?? ""
+        if let info = resolvedWindowInfo[key] {
+            if text.isEmpty {
+                labelManager?.clearWindowLabel(for: info)
+            } else {
+                labelManager?.setWindowLabel(text, for: info)
+            }
+            labelManager?.invalidateCache(for: info.identifier)
+        }
+        exitEditMode(for: key)
+
+        // Refresh overlay with new label
+        if let info = resolvedWindowInfo[key],
+           let assignment = labelManager?.labelForWindow(info) {
+            let isPinned = assignment.isPinned || settings.displayMode == .pinned || settings.multiWindowMode
+            showOrUpdateLabel(assignment.label, for: info, isPinned: isPinned)
+        }
+    }
+
+    func cancelEdit(for key: String) {
+        editingText.removeValue(forKey: key)
+        exitEditMode(for: key)
+        // Restore display view with original label
+        if let overlay = overlayWindows[key] {
+            let label = overlayLabels[key] ?? ""
+            rebuildDisplayContent(for: key, label: label, overlay: overlay)
+        }
+    }
+
+    private func exitEditMode(for key: String) {
+        guard let overlay = overlayWindows[key] else { return }
+        overlay.isEditMode = false
+        overlay.ignoresMouseEvents = true
+    }
+
+    // MARK: - Content rebuild
+
+    private func rebuildDisplayContent(for key: String, label: String, overlay: OverlayWindow) {
+        let hostingView = NSHostingView(
+            rootView: LabelOverlayView(label: label, settings: settings)
+        )
+        let fittingSize = hostingView.fittingSize
+        hostingView.frame = NSRect(origin: .zero, size: fittingSize)
+        overlay.contentView = hostingView
+        overlay.setContentSize(fittingSize)
+    }
+
+    private func rebuildEditContent(for key: String, overlay: OverlayWindow) {
+        let binding = Binding<String>(
+            get: { [weak self] in self?.editingText[key] ?? "" },
+            set: { [weak self] in self?.editingText[key] = $0 }
+        )
+        let label = overlayLabels[key] ?? ""
+        let view = LabelOverlayView(
+            label: label,
+            settings: settings,
+            isEditing: true,
+            editText: binding,
+            onCommit: { [weak self] in self?.commitEdit(for: key) },
+            onCancel: { [weak self] in self?.cancelEdit(for: key) }
+        )
+        let hostingView = NSHostingView(rootView: view)
+        let fittingSize = hostingView.fittingSize
+        hostingView.frame = NSRect(origin: .zero, size: fittingSize)
+        overlay.contentView = hostingView
+        overlay.setContentSize(fittingSize)
+    }
+
     // MARK: - Private
 
     private func getOrCreateOverlay(for key: String) -> OverlayWindow {
@@ -193,11 +303,11 @@ final class OverlayManager {
     private func loadPositions() {
         guard let data = UserDefaults.standard.data(forKey: "overlayPositions"),
               let dict = try? JSONDecoder().decode([String: [Double]].self, from: data) else { return }
-        customPositions = dict.mapValues { CGPoint(x: $0[0], y: $0[1]) }
+        userDraggedPositions = dict.mapValues { CGPoint(x: $0[0], y: $0[1]) }
     }
 
     private func savePositions() {
-        let dict = customPositions.mapValues { [$0.x, $0.y] }
+        let dict = userDraggedPositions.mapValues { [$0.x, $0.y] }
         if let data = try? JSONEncoder().encode(dict) {
             UserDefaults.standard.set(data, forKey: "overlayPositions")
         }
@@ -207,17 +317,13 @@ final class OverlayManager {
 
     private func calculatePosition(for window: WindowInfo, overlaySize: NSSize) -> CGPoint {
         let inset = settings.labelInset
-        let windowFrame = window.frame // CG coordinates (origin = top-left of main display)
+        let windowFrame = window.frame
 
-        // Get main screen height for CG→NS conversion
         guard let mainScreen = NSScreen.screens.first else {
             return CGPoint(x: 100, y: 100)
         }
         let mainScreenHeight = mainScreen.frame.height
 
-        // Convert CG origin (top-left) to NS origin (bottom-left)
-        // CG: y=0 at top, increases downward
-        // NS: y=0 at bottom, increases upward
         let nsWindowLeft = windowFrame.origin.x
         let nsWindowBottom = mainScreenHeight - windowFrame.origin.y - windowFrame.size.height
         let nsWindowRight = nsWindowLeft + windowFrame.size.width
@@ -261,7 +367,6 @@ final class OverlayManager {
     }
 
     private func clampToVisibleScreens(_ point: CGPoint, overlaySize: NSSize) -> CGPoint {
-        // Find the screen that contains this point
         let testRect = NSRect(origin: point, size: overlaySize)
         let screen = NSScreen.screens.first { $0.frame.intersects(testRect) } ?? NSScreen.main
 

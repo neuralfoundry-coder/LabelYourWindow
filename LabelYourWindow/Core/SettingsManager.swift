@@ -95,6 +95,11 @@ final class SettingsManager {
         set { UserDefaults.standard.set(newValue, forKey: "allowDragging") }
     }
 
+    var multiWindowMode: Bool {
+        get { UserDefaults.standard.object(forKey: "multiWindowMode") as? Bool ?? false }
+        set { UserDefaults.standard.set(newValue, forKey: "multiWindowMode") }
+    }
+
     var launchAtLogin: Bool {
         get { UserDefaults.standard.object(forKey: "launchAtLogin") as? Bool ?? false }
         set {

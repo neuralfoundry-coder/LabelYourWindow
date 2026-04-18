@@ -11,6 +11,7 @@ final class WindowObserver {
     private var axObservers: [pid_t: AXObserver] = [:]
     private var workspaceObservers: [NSObjectProtocol] = []
     private var currentAppPID: pid_t = 0
+    private var windowTitleCache: [String: String] = [:]
 
     func startObserving() {
         let nc = NSWorkspace.shared.notificationCenter
@@ -191,6 +192,7 @@ final class WindowObserver {
             logger.info("Window changed: \(title, privacy: .public) [\(appName, privacy: .public)]")
             currentWindow = info
         }
+        windowTitleCache[info.identifier.key] = title
     }
 
     private func windowNumberFromAX(pid: pid_t, position: CGPoint, size: CGSize) -> Int {
@@ -214,6 +216,55 @@ final class WindowObserver {
         }
 
         return Int(pid)
+    }
+
+    // MARK: - All visible windows enumeration
+
+    func allVisibleWindows() -> [WindowInfo] {
+        let options = CGWindowListOption([.optionOnScreenOnly, .excludeDesktopElements])
+        guard let windowList = CGWindowListCopyWindowInfo(options, kCGNullWindowID) as? [[String: Any]] else {
+            return []
+        }
+
+        let runningApps = Dictionary(
+            NSWorkspace.shared.runningApplications.map { ($0.processIdentifier, $0) },
+            uniquingKeysWith: { first, _ in first }
+        )
+        let ourBundleID = Bundle.main.bundleIdentifier ?? ""
+
+        var results: [WindowInfo] = []
+        for entry in windowList {
+            guard let layer = entry[kCGWindowLayer as String] as? Int, layer == 0 else { continue }
+            guard let pid = entry[kCGWindowOwnerPID as String] as? pid_t else { continue }
+            guard let number = entry[kCGWindowNumber as String] as? Int else { continue }
+            guard let bounds = entry[kCGWindowBounds as String] as? [String: Any],
+                  let x = bounds["X"] as? CGFloat,
+                  let y = bounds["Y"] as? CGFloat,
+                  let w = bounds["Width"] as? CGFloat,
+                  let h = bounds["Height"] as? CGFloat,
+                  w >= 100, h >= 50 else { continue }
+
+            let app = runningApps[pid]
+            guard app?.bundleIdentifier != ourBundleID else { continue }
+
+            let identifier = WindowIdentifier(pid: pid, windowNumber: number)
+            let cgTitle = entry[kCGWindowName as String] as? String ?? ""
+            let title = cgTitle.isEmpty ? (windowTitleCache[identifier.key] ?? "") : cgTitle
+            let appName = app?.localizedName ?? (entry[kCGWindowOwnerName as String] as? String ?? "Unknown")
+            let bundleID = app?.bundleIdentifier
+            let frame = CGRect(x: x, y: y, width: w, height: h)
+            let axElement = AXUIElementCreateApplication(pid)
+
+            results.append(WindowInfo(
+                identifier: identifier,
+                appName: appName,
+                bundleID: bundleID,
+                windowTitle: title,
+                frame: frame,
+                axElement: axElement
+            ))
+        }
+        return results
     }
 
     private func windowInfoFromCGWindowList(pid: pid_t, appName: String, bundleID: String?) -> WindowInfo? {

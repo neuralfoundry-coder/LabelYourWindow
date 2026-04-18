@@ -11,6 +11,7 @@ struct LabelAssignment: Codable, Equatable {
         case autoDetected
         case rule
         case manual
+        case windowLevel
     }
 
     init(

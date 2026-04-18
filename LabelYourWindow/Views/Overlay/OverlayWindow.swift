@@ -2,9 +2,24 @@ import AppKit
 
 final class OverlayWindow: NSPanel {
     var onDragMoved: ((CGPoint) -> Void)?
+    var onDoubleClick: (() -> Void)?
+
     private var initialMouseLocation: CGPoint = .zero
     private var initialWindowOrigin: CGPoint = .zero
     private(set) var isDragging = false
+    private var _isEditMode: Bool = false
+
+    var isEditMode: Bool {
+        get { _isEditMode }
+        set {
+            _isEditMode = newValue
+            if newValue {
+                makeKeyAndOrderFront(nil)
+            } else {
+                resignKey()
+            }
+        }
+    }
 
     init(contentRect: NSRect) {
         super.init(
@@ -28,7 +43,7 @@ final class OverlayWindow: NSPanel {
         isMovableByWindowBackground = false
     }
 
-    override var canBecomeKey: Bool { false }
+    override var canBecomeKey: Bool { _isEditMode }
     override var canBecomeMain: Bool { false }
 
     func showHoverFeedback(_ show: Bool) {
@@ -48,6 +63,10 @@ final class OverlayWindow: NSPanel {
     }
 
     override func mouseDown(with event: NSEvent) {
+        if event.clickCount == 2 && !_isEditMode {
+            onDoubleClick?()
+            return
+        }
         NSCursor.closedHand.push()
         initialMouseLocation = NSEvent.mouseLocation
         initialWindowOrigin = frame.origin

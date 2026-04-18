@@ -7,6 +7,7 @@ struct GeneralSettingsView: View {
         Form {
             Section("Behavior") {
                 Toggle("Enable LabelYourWindow", isOn: $settings.isEnabled)
+                Toggle("모든 윈도우에 라벨 표시", isOn: $settings.multiWindowMode)
                 Toggle("Show label on window switch", isOn: $settings.showOnWindowSwitch)
                 Toggle("Show label on app switch", isOn: $settings.showOnAppSwitch)
                 Toggle("Allow dragging labels", isOn: $settings.allowDragging)

@@ -9,6 +9,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     var labelManager: LabelManager!
     var overlayManager: OverlayManager!
     private var observationTask: Task<Void, Never>?
+    private var multiWindowPollTask: Task<Void, Never>?
     private var accessibilityPollTask: Task<Void, Never>?
     private var isObserving = false
 
@@ -19,8 +20,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         windowObserver = WindowObserver()
         labelManager = LabelManager(settings: settings)
         overlayManager = OverlayManager(settings: settings)
+        overlayManager.labelManager = labelManager
 
         setupPipeline()
+        setupMultiWindowLoop()
 
         if AccessibilityHelper.isAccessibilityEnabled {
             startObserving()
@@ -31,6 +34,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationWillTerminate(_ notification: Notification) {
         observationTask?.cancel()
+        multiWindowPollTask?.cancel()
         accessibilityPollTask?.cancel()
         windowObserver.stopObserving()
         overlayManager.hideAll()
@@ -77,15 +81,37 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 guard self.settings.isEnabled else { continue }
                 guard let window = self.windowObserver.currentWindow else { continue }
 
-                // Skip if same window (no actual switch)
                 if let prev = previousWindow, prev == window { continue }
 
                 let assignment = self.labelManager.labelForWindow(window)
                 guard !assignment.label.isEmpty else { continue }
 
-                let isPinned = assignment.isPinned || self.settings.displayMode == .pinned
+                let isPinned = assignment.isPinned || self.settings.displayMode == .pinned || self.settings.multiWindowMode
                 logger.info("Label: '\(assignment.label, privacy: .public)' for \(window.appName, privacy: .public) [pinned:\(isPinned)]")
-                self.overlayManager.showLabel(assignment.label, for: window, isPinned: isPinned)
+                self.overlayManager.showOrUpdateLabel(assignment.label, for: window, isPinned: isPinned)
+            }
+        }
+    }
+
+    private func setupMultiWindowLoop() {
+        multiWindowPollTask = Task { @MainActor [weak self] in
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .milliseconds(500))
+                guard let self = self,
+                      self.settings.isEnabled,
+                      self.settings.multiWindowMode else { continue }
+
+                let windows = self.windowObserver.allVisibleWindows()
+                var activeKeys = Set<String>()
+
+                for window in windows {
+                    let assignment = self.labelManager.labelForWindow(window)
+                    guard !assignment.label.isEmpty else { continue }
+                    self.overlayManager.showOrUpdateLabel(assignment.label, for: window, isPinned: true)
+                    activeKeys.insert(window.identifier.key)
+                }
+
+                self.overlayManager.removeOverlays(notIn: activeKeys)
             }
         }
     }
